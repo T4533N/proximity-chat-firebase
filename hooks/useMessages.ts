@@ -1,5 +1,5 @@
-import { getMessages } from '@/lib/firebase';
 import React from 'react';
+import { getMessages } from '@/lib/firebase';
 
 function useMessages(roomId: string) {
     const [messages, setMessages] = React.useState([]);

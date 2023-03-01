@@ -22,8 +22,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-
-
 async function sendMessage(roomId: string, displayName: string, text: string) {
   try {
     await addDoc(collection(db, "chat-rooms", roomId, "messages"), {

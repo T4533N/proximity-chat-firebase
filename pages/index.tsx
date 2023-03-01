@@ -1,10 +1,9 @@
 import { sendMessage } from "@/lib/firebase";
-import { Inter } from "next/font/google";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import geohash from "ngeohash";
 import { useMessages } from "@/hooks/useMessages";
+import geohash from "ngeohash";
 
-function MessageList({ roomId }: any) {
+function MessageList({ roomId, displayName }: any) {
   const containerRef = useRef<HTMLElement>(null);
   const messages = useMessages(roomId);
 
@@ -19,7 +18,11 @@ function MessageList({ roomId }: any) {
     <div className="message-list-container" ref={containerRef}>
       <ul className="message-list">
         {messages.map((x: any, id) => (
-          <Message key={id} message={x} isOwnMessage={true} />
+          <Message
+            key={id}
+            message={x}
+            isOwnMessage={x.displayName === displayName}
+          />
         ))}
       </ul>
     </div>
@@ -39,18 +42,21 @@ function Message({ message, isOwnMessage }: any) {
 
 export default function Home() {
   const [value, setValue] = useState<any>("");
-  const [userGeoHash, setuserGeoHash] = useState("");
-
-  console.log("🚀 ~ file: index.jsx:12 ~ Landing ~ userGeoHash", userGeoHash);
+  const [displayName, setDisplayName] = useState("");
+  const [userGeoHash, setUserGeoHash] = useState("");
+  const [precision, setPrecision] = useState(5);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition((position) => {
-      console.log(position.coords.latitude, position.coords.longitude);
-      setuserGeoHash(
-        geohash.encode(position.coords.latitude, position.coords.longitude, 5)
+      const hash = geohash.encode(
+        position.coords.latitude,
+        position.coords.longitude,
+        precision ? precision : 5
       );
+
+      setUserGeoHash(hash);
     });
-  }, []);
+  }, [precision]);
 
   const handleChange = (event: any) => {
     setValue(event.target.value);
@@ -58,27 +64,98 @@ export default function Home() {
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
-    sendMessage(userGeoHash, "bhaaiiiii maro mujhe maro", value);
+    sendMessage(userGeoHash, displayName, value);
     setValue("");
   };
 
   return (
-    <>
-      <form onSubmit={handleSubmit} className="message-input-container">
-        <input
-          type="text"
-          placeholder="Enter a message"
-          value={value}
-          onChange={handleChange}
-          className="message-input"
-          required
-          minLength={1}
-        />
-        <button type="submit" disabled={value < 1} className="send-message">
-          Send
-        </button>
-      </form>
-      {userGeoHash && <MessageList roomId={"wh0r3"} />}
-    </>
+    <div className="container">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 20,
+        }}
+      >
+        <div
+          style={{
+            fontSize: "2rem",
+          }}
+        >
+          {userGeoHash ? userGeoHash : "Geohash..1..2..3.."}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 10,
+            alignItems: "center",
+          }}
+        >
+          <input
+            type="text"
+            id="name-input"
+            className="common-input"
+            placeholder="Name"
+            onChange={(e) => {
+              setDisplayName(e.target.value);
+            }}
+            value={displayName}
+          />
+          <input
+            id="precision-input"
+            className="common-input"
+            type="number"
+            required={true}
+            placeholder="Precision"
+            onChange={(e) => {
+              setPrecision(parseInt(e.target.value));
+            }}
+            value={precision}
+          />
+        </div>
+      </div>
+
+      <div className="messages-container">
+        {userGeoHash ? (
+          <MessageList roomId={userGeoHash} displayName={displayName} />
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 10,
+              marginTop: 10,
+            }}
+          >
+            Hang on there, loading chats...
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="message-input-container">
+          <input
+            type="text"
+            placeholder="Enter a message"
+            value={value}
+            onChange={handleChange}
+            className="message-input"
+            required
+            minLength={1}
+          />
+
+          <button
+            type="submit"
+            disabled={value < 1 && displayName.length < 1}
+            className="send-message"
+          >
+            Send
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }
