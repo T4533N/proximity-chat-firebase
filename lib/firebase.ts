@@ -10,13 +10,13 @@ import {
 } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC7np738uwZWm_o_UPefW4FWsVmK4JJ2BE",
-  authDomain: "proximity-chat-1bb86.firebaseapp.com",
-  projectId: "proximity-chat-1bb86",
-  storageBucket: "proximity-chat-1bb86.appspot.com",
-  messagingSenderId: "330770193858",
-  appId: "1:330770193858:web:8a52d0f1661a2def258a5b",
-  measurementId: "G-EJ8RGE33LK",
+  apiKey: process.env.NEXT_PUBLIC_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
